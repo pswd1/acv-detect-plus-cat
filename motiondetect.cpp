@@ -25,10 +25,79 @@ bool motiondetect(int sensitivity, Mat prev_frame, Mat curr_frame){
 
     //for now we will just do a color diff not a grayscale
     absdiff(prev_frame, curr_frame, diff_frame);
-    diff_value = (unsigned int)cv::sum(mat_diff)[0]; //add up only the blue frame
+    diff_value = (unsigned int)cv::sum(diff_frame)[0]; //add up only the blue frame
     if (diff_value > sensitivity){
         //motion detected
         return true;
     }
     return false;
 }
+
+void exclusionzone(tuple<int, int> top_left,tuple<int, int> bottom_right,  Mat in_mat, Mat &ex_mat){
+    /*
+        example mat is 250x250
+        example inputs
+                     x    y
+        topleft =   (34,  27)
+        topright =  (123, 238)
+    
+    */
+    //this program will draw a white box over an area in the mat which excludes it from motion detection.
+    //get the coordinates of the tuples for top right and lower left
+    int x1 = get<0>(top_left);
+    int y1 = get<1>(top_left);
+
+    int x2 = get<0>(bottom_right);
+    int y2 = get<1>(bottom_right);
+    //clone in_mat to ex_mat
+    ex_mat = in_mat.clone();
+
+    //loop through ex_mat and overwrite pixels
+    for(int x = 0; x < ex_mat.rows; x++){
+        for(int y = 0; y < ex_mat.cols; y++){
+            //if row is in range
+            if(x >= x1 && x <=x2){
+                //if col is in range
+                if(y >= y1 && y <=y2){
+                    ex_mat.at<Vec3b>(x,y)[0] = 0;
+                    ex_mat.at<Vec3b>(x,y)[1] = 0;
+                    ex_mat.at<Vec3b>(x,y)[2] = 0;
+                    //pixel == 255
+                }
+                
+            }
+            
+        }
+    }
+}
+
+void testexclusionzone(){
+    Mat original;
+    Mat excluded;
+
+    VideoCapture cam0(0);
+
+    cam0.read(original);
+
+    if (!cam0.isOpened())
+    {
+        exit(-1);
+    }
+
+
+    tuple<int , int > tr(170, 83);
+    tuple<int , int > bl(400, 377);
+
+    exclusionzone(tr, bl, original, excluded);
+    namedWindow("original");
+    namedWindow("excluded");
+    imshow("original", original);
+    
+    imshow("excluded", excluded);
+    waitKey();
+}
+
+// int main(){
+//     testexclusionzone();
+//     return 0;
+// }
