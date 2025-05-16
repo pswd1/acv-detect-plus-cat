@@ -81,9 +81,13 @@ int main(int argc, char* argv[]){
   if(argc < 2){
     cerr << "Error: \n" << "Usage: ./main (capture device) \n" << "./main 1" << endl; 
     return -1;
+  } else {
+    int cam = stoi(argv[1]);
+    cout << "Using Capture Device: " << cam << endl;
   }
-  // Open camera 2 (change this to mandatory cmd line arg)
-  VideoCapture cap(2);
+
+  // open selected capture device and start capturing frames for processing
+  VideoCapture cap(cam);
   if(!cap.isOpened())
   {
     cout << "--(!)Error opening camera 2\n";
