@@ -44,6 +44,7 @@ void exclusionzone(tuple<int, int> top_left,tuple<int, int> bottom_right,  Mat i
     */
     //this program will draw a white box over an area in the mat which excludes it from motion detection.
     //get the coordinates of the tuples for top right and lower left
+
     int x1 = get<0>(top_left);
     int y1 = get<1>(top_left);
 
@@ -52,16 +53,20 @@ void exclusionzone(tuple<int, int> top_left,tuple<int, int> bottom_right,  Mat i
     //clone in_mat to ex_mat
     ex_mat = in_mat.clone();
 
+    if (x1 > x2) swap(x1, x2);
+    if (y1 > y2) swap(y1, y2);
+
     //loop through ex_mat and overwrite pixels
-    for(int x = 0; x < ex_mat.rows; x++){
-        for(int y = 0; y < ex_mat.cols; y++){
+    // cout << ex_mat
+    for(int y = 0; y < ex_mat.rows; y++){
+        if(y >= y1 && y <=y2){
             //if row is in range
-            if(x >= x1 && x <=x2){
+            for(int x = 0; x < ex_mat.cols; x++){
                 //if col is in range
-                if(y >= y1 && y <=y2){
-                    ex_mat.at<Vec3b>(x,y)[0] = 0;
-                    ex_mat.at<Vec3b>(x,y)[1] = 0;
-                    ex_mat.at<Vec3b>(x,y)[2] = 0;
+                if(x >= x1 && x <=x2){
+                    ex_mat.at<Vec3b>(y,x)[0] = 0;
+                    ex_mat.at<Vec3b>(y,x)[1] = 0;
+                    ex_mat.at<Vec3b>(y,x)[2] = 0;
                     //pixel == 255
                 }
                 
