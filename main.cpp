@@ -29,6 +29,7 @@ CascadeClassifier cat_cascade;
 vector<pair<tuple<int, int>, tuple<int, int>>> exclusion_collection;//data-struct of tuples each rectangle is comprised of a pair of points
 tuple<int, int> tl(-1,-1); //top right
 tuple<int, int> br(-1,-1); //bot left
+Mat temp;
 int sliderValue = 0;
 int sensitivity = 1;
 
@@ -228,7 +229,7 @@ void onmouse(int action, int x, int y, int, void*){
 
 int motioncalibrate(VideoCapture camera){
     //sensitivity num
-    Mat frame, exclusions;
+    Mat frame, exclusions, e_instructions;
     bool done = false;
     
     //start capture from cam
@@ -240,10 +241,12 @@ int motioncalibrate(VideoCapture camera){
     //capture frame
     camera.read(frame);
     exclusions = frame.clone();
+    
 
     //loop
-    //void cv::setMouseCallback 	(const String &winname, MouseCallback onMouse, void *  userdata = 0 ) 	
-    cout << "click and drag to select top left then bottom right of the exclusion" << endl;
+    //void cv::setMouseCallback 	(const String &winname, MouseCallback onMouse, void *  userdata = 0 ) 
+    	
+
     bool skip_switch = false;
     int key = -1;
     //GET EXCLUSION ZONES
@@ -251,7 +254,10 @@ int motioncalibrate(VideoCapture camera){
         
         //wait for bottom left point to populate
         while(get<1>(br) == -1 && get<1>(tl) == -1){
-            imshow("exclusion selection", exclusions);
+            string instruct = "click and drag to select an area or press enter to continue";
+            e_instructions = exclusions.clone();
+            putText(e_instructions, instruct, Point(20, 20), 2, 0.5, Scalar(50,50,50), 2);
+            imshow("exclusion selection", e_instructions);
             //draw exclusion with mouse
             setMouseCallback("exclusion selection", onmouse);
             char input;
@@ -262,11 +268,19 @@ int motioncalibrate(VideoCapture camera){
                 done = true;
                 break;
             }
-        }        
+        }  
+        
+        string instruct = "keep this area (y/n); esc to quit; enter to discard and continue";
+        e_instructions = exclusions.clone();
+        exclusionzone(tl, br, exclusions, e_instructions);
+        putText(e_instructions, instruct, Point(20, 20), 2, 0.5, Scalar(50,50,50), 2);
+        imshow("exclusion selection", e_instructions);
         if(!skip_switch){
             key = waitKey(1);
         }
+
         pair<tuple<int, int>, tuple<int, int>> pair;
+
         switch(key){
             //keep (y/n)
             case YES_KEY:
@@ -335,7 +349,7 @@ int motioncalibrate(VideoCapture camera){
         text.append(to_string(sensitivity));
         text.append(")");
         f1 = ex1.clone();
-        putText(f1, text, Point(20, 20), 1, 1, Scalar(50,50,50), 2);
+        putText(f1, text, Point(20, 20), 2, 0.5, Scalar(50,50,50), 2);
         
         //show frame
         imshow("sensitivity calibration", f1);
