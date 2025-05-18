@@ -207,6 +207,9 @@ void populatezones( Mat in, Mat &out){
     for (auto& [p1, p2] : exclusion_collection){
         exclusionzone(p1, p2, out, out);
     }
+  }else{
+    //we still need to populate this even if there are no exclusions
+    out = in.clone();
   }
 }
 
@@ -247,7 +250,7 @@ int motioncalibrate(VideoCapture camera){
     //void cv::setMouseCallback 	(const String &winname, MouseCallback onMouse, void *  userdata = 0 ) 
     	
 
-    bool skip_switch = false;
+    bool skip_exclude = false;
     int key = -1;
     //GET EXCLUSION ZONES
     while(1){
@@ -264,7 +267,7 @@ int motioncalibrate(VideoCapture camera){
             if((input = waitKey(1)) == ESCAPE_KEY){
                 return -1;
             }else if(input == ENTER_KEY){
-                skip_switch = true;
+                skip_exclude = true;
                 done = true;
                 break;
             }
@@ -272,14 +275,17 @@ int motioncalibrate(VideoCapture camera){
         
         string instruct = "keep this area (y/n); esc to quit; enter to discard and continue";
         e_instructions = exclusions.clone();
-        exclusionzone(tl, br, exclusions, e_instructions);
+        if (!skip_exclude){
+          exclusionzone(tl, br, exclusions, e_instructions);
+        }
         putText(e_instructions, instruct, Point(20, 20), 2, 0.5, Scalar(50,50,50), 2);
         imshow("exclusion selection", e_instructions);
-        if(!skip_switch){
-            key = waitKey(1);
-        }
+        key = waitKey(1);
 
         pair<tuple<int, int>, tuple<int, int>> pair;
+        if (skip_exclude){
+          key = ENTER_KEY;
+        }
 
         switch(key){
             //keep (y/n)
