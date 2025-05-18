@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
   //create the keys for the arg parser
   const String keys =
     "{help h usage ? || print this message }"
-    "{c camera       || specify a camera to use}"
+    "{c              || specify a camera to use}"
     "{b calibrate    || run motion calibration for exclusions and sensitivity before starting the program}"
     "{d diff         || use the diff tool to compare two images for changes}"
     ;
@@ -63,9 +63,9 @@ int main(int argc, char* argv[]) {
       return 0;
   }
 
-  if (parser.has("camera") || parser.has("c")){
-    cout << "Using Capture Device: " << argv[1] << endl;
-    int cam = parser.get<int>("camera");
+  if (parser.has("c")){
+    int cam = parser.get<int>("c");
+    cout << "Using Capture Device: " << cam << endl;
     cap.open(cam);
     if(!cap.isOpened()) {
       cout << "--(!)Error opening camera\n";
